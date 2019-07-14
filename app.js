@@ -20,7 +20,7 @@ let resp = {
 
 let pet = {
     id: 0,
-    name: '',
+    petName: '',
     breed: '',
     age: 0,
     color: '',
@@ -61,7 +61,7 @@ app.post('/user', (req, res) => {
         resp = {
             error: true,
             code: 502,
-            message: 'Name and Last name fields are required'
+            message: 'Every field is required'
         };
     } else {
         if (user.uid !== 0 || user.name !== '' || user.lastName !== '') {
@@ -93,7 +93,7 @@ app.put('/user', (req, res) => {
         resp = {
             error: true,
             code: 502,
-            message: 'Name and Last name fields are required'
+            message: 'Every field is required'
         };
     } else {
         if (user.uid === 0 || user.name === '' || user.lastName === '') {
@@ -144,7 +144,7 @@ app.delete('/user', (req, res) => {
 
 //Create Pet
 app.post('/pet', (req, res) => {
-    if (!req.body.id || !req.body.name || !req.body.breed || !req.body.age || !req.body.color || !req.body.size || !req.body.nature || !req.body.location) {
+    if (!req.body.id || !req.body.petName || !req.body.breed || !req.body.age || !req.body.color || !req.body.size || !req.body.nature || !req.body.location) {
         resp = {
             error: true,
             code: 502,
@@ -162,7 +162,7 @@ app.post('/pet', (req, res) => {
         } else {
             pet = {
                 id: req.body.id,
-                name: req.body.name,
+                petName: req.body.petName,
                 breed: req.body.breed,
                 age: req.body.age,
                 color: req.body.color,
@@ -171,7 +171,7 @@ app.post('/pet', (req, res) => {
                 location: req.body.location
             };
             pets.push(pet);
-            petsOrder;
+            pets.sort((a, b) => a.id - b.id);
             resp = {
                 error: false,
                 code: 200,
@@ -183,7 +183,6 @@ app.post('/pet', (req, res) => {
     res.send(resp);
 });
 
-const petsOrder = pets.sort((a, b) => a - b);
 const removeAllElements = (array, elem) => {  
     let index = array.indexOf(elem);
     while (index > -1) {
@@ -195,7 +194,7 @@ const removeAllElements = (array, elem) => {
 //Update pet
 app.put('/pet/:id', (req, res) => {
     const id = Number(req.params.id);
-    if (!req.body.id || !req.body.name || !req.body.breed || !req.body.age || !req.body.color || !req.body.size || !req.body.nature || !req.body.location) {
+    if (!req.body.id || !req.body.petName || !req.body.breed || !req.body.age || !req.body.color || !req.body.size || !req.body.nature || !req.body.location) {
         resp = {
             error: true,
             code: 502,
@@ -204,7 +203,7 @@ app.put('/pet/:id', (req, res) => {
     } else {
         const findPet = pets.find(pet => {
             pet.id === id &&
-            pet.name === req.body.name &&
+            pet.petName === req.body.petName &&
             pet.breed === req.body.breed &&
             pet.age === req.body.age &&
             pet.color === req.body.color &&
@@ -224,7 +223,7 @@ app.put('/pet/:id', (req, res) => {
             if (findPet) {
                 pet = {
                     id: id,
-                    name: req.body.name,
+                    petName: req.body.petName,
                     breed: req.body.breed,
                     age: req.body.age,
                     color: req.body.color,
@@ -234,7 +233,7 @@ app.put('/pet/:id', (req, res) => {
                 };
                 removeAllElements(pets, findPet);
                 pets.push(pet);
-                petsOrder;
+                pets.sort((a, b) => a.id - b.id);
                 resp = {
                     error: false,
                     code: 200,
@@ -277,7 +276,7 @@ app.delete('/pet/:id', (req, res) => {
 
 //Get Pets
 app.get('/pets', (req, res) => {
-    petsOrder;
+    pets.sort((a, b) => a.id - b.id);
     resp = {
         error: false,
         code: 200,
@@ -306,6 +305,7 @@ app.get('/user/:uid', (req, res) => {
     res.send(resp);
 });
 app.get('/pet/:id', (req, res) => {
+    pets.sort((a, b) => a.id - b.id);
     const id = Number(req.params.id);
     const findPet = pets.find(pet => pet.id === id);
     if (findPet) {
@@ -327,16 +327,18 @@ app.get('/pet/:id', (req, res) => {
 
 //Queries
 app.get('/search', (req, res) => {
-    const id = req.query.id;
-    const uid = req.query.uid;
+    const uid = Number(req.query.uid);
     const name = req.query.name;
     const lastName = req.query.lastName;
+    const id = Number(req.query.id);
+    const petName = req.query.petName;
     const breed = req.query.breed;
-    const age = req.query.age;
+    const age = Number(req.query.age);
     const color = req.query.color;
     const size = req.query.size;
     const nature = req.query.nature;
     const location = req.query.location;
+    pets.sort((a, b) => a.id - b.id);
     if (uid !== user.uid || name !== user.name || lastName !== user.lastName) {
         resp = {
             error: true,
@@ -351,7 +353,7 @@ app.get('/search', (req, res) => {
             response: user
         };
     };
-    const findPet = pets.find(pet => pet.id === id && pet.name === name || pet.breed === breed || pet.age === age || pet.color === color || pet.size === size || pet.nature === nature || pet.location === location);
+    const findPet = pets.find(pet => pet.id === id && pet.petName === petName || pet.breed === breed || pet.age === age || pet.color === color || pet.size === size || pet.nature === nature || pet.location === location);
     if (findPet) {
         resp = {
             error: false,
